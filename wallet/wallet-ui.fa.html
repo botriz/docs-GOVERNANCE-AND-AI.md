@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>کیف ثریا | Suraya Wallet</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; background: #f4f6f8; color: #1a1a1a; }
+    .wrap { max-width: 480px; margin: 0 auto; padding: 1.25rem; }
+    h1 { font-size: 1.4rem; margin: 0 0 0.25rem; }
+    .sub { color: #666; margin-bottom: 1.25rem; }
+    .card { background: #fff; border-radius: 14px; padding: 1rem 1.15rem; margin-bottom: 1rem; border: 1px solid #e8e8e8; }
+    .bal { font-size: 1.75rem; font-weight: 700; }
+    label { display: block; font-size: 0.85rem; color: #555; margin-bottom: 0.35rem; }
+    input, button { width: 100%; box-sizing: border-box; padding: 0.7rem 0.85rem; border-radius: 10px; border: 1px solid #ddd; font-size: 1rem; margin-bottom: 0.75rem; }
+    button { background: #0d6efd; color: #fff; border: none; cursor: pointer; font-weight: 600; }
+    button.secondary { background: #6c757d; }
+    button:disabled { opacity: 0.55; }
+    .addr { word-break: break-all; font-size: 0.8rem; background: #f5f5f5; padding: 0.5rem; border-radius: 8px; }
+    .hist { font-size: 0.9rem; }
+    .hist div { padding: 0.4rem 0; border-bottom: 1px solid #f0f0f0; }
+    .ok { color: #0a7; }
+    .muted { color: #888; font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>🌟 کیف ثریا</h1>
+    <p class="sub">Suraya Wallet — زبان اصلی فارسی</p>
+
+    <div class="card">
+      <div class="muted">موجودی ARZA</div>
+      <div class="bal" id="balance">0</div>
+      <div class="muted" id="policy">نسخه قوانین: —</div>
+    </div>
+
+    <div class="card">
+      <label>آدرس کیف شما</label>
+      <div class="addr" id="address">در حال ساخت...</div>
+      <button type="button" class="secondary" id="btnNew">ساخت کیف جدید</button>
+    </div>
+
+    <div class="card">
+      <label>ارسال به آدرس</label>
+      <input id="to" placeholder="SRY..." />
+      <label>مبلغ</label>
+      <input id="amount" type="number" min="1" placeholder="مثلاً ۱۰" />
+      <button type="button" id="btnSend">ارسال</button>
+      <p class="muted" id="msg"></p>
+    </div>
+
+    <div class="card">
+      <strong>تاریخچه</strong>
+      <div class="hist" id="history"></div>
+    </div>
+  </div>
+
+  <script>
+    // اسکلت سمت مرورگر (بدون نیاز به Node)
+    var state = {
+      address: null,
+      balances: { ARZA: 100 },
+      history: [],
+      policyVersion: 1,
+      tax: 2
+    };
+
+    function render() {
+      document.getElementById('balance').textContent = state.balances.ARZA;
+      document.getElementById('address').textContent = state.address || '—';
+      document.getElementById('policy').textContent = 'نسخه قوانین: ' + state.policyVersion + ' | مالیات انتقال: ' + state.tax + '٪';
+      var h = document.getElementById('history');
+      h.innerHTML = state.history.length ? state.history.map(function (x) {
+        return '<div>' + (x.type === 'in' ? 'ورود' : 'خروج') + ' ' + x.amount + ' ARZA — ' + (x.note || '') + '</div>';
+      }).join('') : '<div class="muted">خالی</div>';
+    }
+
+    function newWallet() {
+      var hex = '';
+      var a = '0123456789abcdef';
+      for (var i = 0; i < 40; i++) hex += a[Math.floor(Math.random() * 16)];
+      state.address = 'SRY' + hex;
+      state.history.unshift({ type: 'in', amount: 0, note: 'ساخت کیف', at: Date.now() });
+      document.getElementById('msg').textContent = 'کیف جدید ساخته شد. عبارت بازیابی در نسخهٔ بعدی اضافه می‌شود.';
+      render();
+    }
+
+    document.getElementById('btnNew').onclick = newWallet;
+    document.getElementById('btnSend').onclick = function () {
+      var to = document.getElementById('to').value.trim();
+      var amount = Number(document.getElementById('amount').value);
+      if (!state.address) { document.getElementById('msg').textContent = 'اول کیف بسازید'; return; }
+      if (!to || !amount || amount <= 0) { document.getElementById('msg').textContent = 'آدرس و مبلغ معتبر وارد کنید'; return; }
+      if (state.balances.ARZA < amount) { document.getElementById('msg').textContent = 'موجودی کافی نیست'; return; }
+      state.balances.ARZA -= amount;
+      state.history.unshift({ type: 'out', amount: amount, note: 'به ' + to.slice(0, 12) + '…', at: Date.now() });
+      document.getElementById('msg').textContent = 'ارسال ثبت شد (نسخه آزمایشی محلی).';
+      document.getElementById('amount').value = '';
+      render();
+    };
+
+    newWallet();
+  </script>
+</body>
+</html>
