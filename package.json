@@ -1,0 +1,15 @@
+{
+  "name": "suraya-wallet-ai",
+  "version": "1.0.0",
+  "description": "Suraya Wallet + Central AI + Exchange skeleton",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node -e \"const {CentralIntelligence}=require('./ai/central-core'); const c=new CentralIntelligence(); console.log(c.status());\""
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5"
+  },
+  "license": "MIT"
+}
